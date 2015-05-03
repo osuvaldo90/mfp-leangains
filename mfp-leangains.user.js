@@ -54,7 +54,7 @@
 	var workout_day = $('#leangains_workout_day');
 	var date_storage = 'leangains_workout_day_' + $('#date_selector').val();
 	var workout_day_storage = localStorage.getItem(date_storage);
-	var is_workout_day = workout_day_storage !== null && workout_day_storage;
+	var is_workout_day = workout_day_storage !== null && workout_day_storage == "true";
 	workout_day.prop('checked', is_workout_day);
 
 	function updateGoalsAndRemaining()
