@@ -67,12 +67,12 @@
             protein_i,
             fiber_i;
 
-        rest_protein_input.val(localStorage.getItem('leangains_rest_protein'));
-        rest_carbs_input.val(localStorage.getItem('leangains_rest_carbs'));
-        rest_fat_input.val(localStorage.getItem('leangains_rest_fat'));
-        work_protein_input.val(localStorage.getItem('leangains_work_protein'));
-        work_carbs_input.val(localStorage.getItem('leangains_work_carbs'));
-        work_fat_input.val(localStorage.getItem('leangains_work_fat'));
+        rest_protein_input.val(rest_protein);
+        rest_carbs_input.val(rest_carbs);
+        rest_fat_input.val(rest_fat);
+        work_protein_input.val(work_protein);
+        work_carbs_input.val(work_carbs);
+        work_fat_input.val(work_fat);
 
         function findIndices(index)
         {
@@ -97,13 +97,23 @@
 
         rows.filter('.total:not(tfoot tr)').each(function ()
         {
-            var row = $(this);
-            var change_function = getTotals;
-
             function getTotals(index)
             {
                 var col = $(this);
-                var num = parseInt(col.text().replace(/,/g, ''), 10);
+                var children = col.children();
+                var num;
+                
+                if (children.length == 0)
+                {
+                    num = col.text();
+                }
+                else
+                {
+                    var html = col.html();
+                    num = html.substring(0, html.indexOf('<'));
+                }
+
+                num = parseInt(num.replace(/,/g, '', 10));
 
                 if (index == calories_i) calories_total = num;
                 if (index == protein_i) protein_total = num;
@@ -159,6 +169,9 @@
                 else col.addClass("negative");
             }
 
+            var row = $(this);
+            var change_function = getTotals;
+
             if (row.hasClass('alt'))
             {
                 change_function = setGoals;
@@ -172,7 +185,7 @@
         });
 
         // do meal/food percentages
-        rows.filter('tbody tr:not(.total, .meal_header, .spacer)').each(function ()
+        rows.filter('tbody tr:not(.meal_header, .spacer)').each(function ()
         {
             var calories,
                 protein,
@@ -198,72 +211,78 @@
 
                 if (children.length == 0)
                 {
-                    num = parseInt(col.children(':first').text().replace(/,/g, ''), 10);
+                    num = col.text();
                 }
                 else
                 {
-                    debugger;
+                    var html = col.html();
+                    num = html.substring(0, html.indexOf('<'));
                 }
+
+                num = parseInt(num.replace(/,/g, '', 10));
                 
                 if (index == calories_i)
                 {
                     calories = num;
                     calories_td = col;
                 }
-                if (index == protein_i)
+                else if (index == protein_i)
                 {
                     protein = num;
                     protein_td = col;
                 }
-                if (index == carbs_i)
+                else if (index == carbs_i)
                 {
                     carbs = num;
                     carbs_td = col;
                 }
-                if (index == fat_i)
+                else if (index == fat_i)
                 {
                     fat = num;
                     fat_td = col;
                 }
 
-                if (!percent_divs_added)
+                if (!percent_divs_added || row.hasClass('alt') || row.hasClass('remaining'))
                 {
                     if (row.hasClass('bottom') && col.hasClass('first'))
                     {
                         col.html(col.html() + daily_pre + 'Percent of Daily Goal' + post + meal_pre
                             + 'Percent of Meal Calories' + post);
                     }
-                    else
+                    else if (index != 0)
                     {
                         col.html(col.html() + daily_pre + post + meal_pre + post);
                     }
                 }
             });
-
+            
             var calories_percent = (calories / calories_goal * 100).toFixed(0);
             if (!isNaN(calories_percent))
             {
-                debugger;
-                calories_td.find('div.daily_percent').text(calories_percent + '%');
+                if (!row.hasClass('alt'))
+                {
+                    calories_td.find('div.daily_percent').text(calories_percent + '%');
 
-                var protein_percent = (protein / protein_goal * 100).toFixed(0);
-                protein_td.find('div.daily_percent').text(protein_percent + '%');
+                    var protein_percent = (protein / protein_goal * 100).toFixed(0);
+                    protein_td.find('div.daily_percent').text(protein_percent + '%');
 
-                var carbs_percent = (carbs / carbs_goal * 100).toFixed(0);
-                carbs_td.find('div.daily_percent').text(carbs_percent + '%');
+                    var carbs_percent = (carbs / carbs_goal * 100).toFixed(0);
+                    carbs_td.find('div.daily_percent').text(carbs_percent + '%');
 
-                var fat_percent = (fat / fat_goal * 100).toFixed(0);
-                fat_td.find('div.daily_percent').text(fat_percent + '%');
+                    var fat_percent = (fat / fat_goal * 100).toFixed(0);
+                    fat_td.find('div.daily_percent').text(fat_percent + '%');
+                }
 
-                if (row.hasClass('bottom'))
+                if (row.hasClass('bottom') || (row.hasClass('total') && !row.hasClass('remaining')))
                 {
                     var protein_meal_percent = (protein * 4 / calories * 100).toFixed(0);
-                    protein_td.find('div.meal_percent').text(protein_meal_percent + '%');
+                    var test = protein_td.find('div.meal_percent');
+                    test.text(protein_meal_percent + '%');
 
                     var carbs_meal_percent = (carbs * 4 / calories * 100).toFixed(0);
                     carbs_td.find('div.meal_percent').text(carbs_meal_percent + '%');
 
-                    var fat_meal_percent = (fat * 4 / calories * 100).toFixed(0);
+                    var fat_meal_percent = (fat * 9 / calories * 100).toFixed(0);
                     fat_td.find('div.meal_percent').text(fat_meal_percent + '%');
                 }
             }
