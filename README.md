@@ -1,4 +1,5 @@
 <p>Created to toggle MyFitnessPal calorie and macro goals between rest and work days</p>
+<p>Note: This script requires that you have the following columns enabled: Protein, Carbs, and Fat. Any order should work.</p>
 
 <h1>Installation</h1>
 <ul>
